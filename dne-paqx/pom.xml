@@ -68,7 +68,7 @@
         <dependency>
             <artifactId>storage-capabilities-api</artifactId>
             <groupId>com.dell.cpsd</groupId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.1-q3stable-SNAPSHOT</version>
             <type>zip</type>
             <classifier>schemas</classifier>
         </dependency>
