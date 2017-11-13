@@ -104,7 +104,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
     {
         final Map<String, WorkflowTask> workflowTasks = new HashMap<>();
 
-        workflowTasks.put("installEsxi", installEsxiTask());
+        /*workflowTasks.put("installEsxi", installEsxiTask());
         workflowTasks.put("retrieveEsxiDefaultCredentialDetails", esxiCredentialDetailsTask());
         workflowTasks.put("addHostToVcenter", addHostToVcenterTask());
         workflowTasks.put("applyEsxiLicense", applyEsxiLicenseTask());
@@ -120,8 +120,8 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("exitHostMaintenanceMode1", exitHostMaintenanceModeTask());
         workflowTasks.put("exitHostMaintenanceMode2", exitHostMaintenanceModeTask());
         workflowTasks.put("setPciPassthroughSioVm", setPciPassthroughSioVmTask());
-        /*workflowTasks.put("installScaleIOSDC", null);
-        workflowTasks.put("addNewHostToScaleIO", null);*/
+        workflowTasks.put("installScaleIOSDC", null);
+        workflowTasks.put("addNewHostToScaleIO", null);
         workflowTasks.put("datastoreRename", datastoreRenameTask());
         workflowTasks.put("configureVmNetworkSettings", configureVmNetworkSettingsTask());
         workflowTasks.put("changeSvmCredentials", changeSvmCredentialsTask());
@@ -130,7 +130,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("addHostToProtectionDomain", addHostToProtectionDomainTask());
         workflowTasks.put("updateSdcPerformanceProfile", updateSdcPerformanceProfileTask());
         workflowTasks.put("configurePxeBoot", configurePxeBootTask());
-        workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());
+        workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());*/
         workflowTasks.put("notifyNodeDiscoveryToUpdateStatus", notifyNodeDiscoveryToUpdateStatusTask());
 
         return workflowTasks;

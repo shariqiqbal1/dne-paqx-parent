@@ -54,8 +54,8 @@
     <modules>
         <module>dne-paqx</module>
         <module>dne-paqx-web</module>
-        <module>dne-paqx-distribution</module>
-        <module>dne-paqx-packaging</module>
+       <!--  <module>dne-paqx-distribution</module>
+        <module>dne-paqx-packaging</module> -->
     </modules>
 
     <dependencyManagement>
