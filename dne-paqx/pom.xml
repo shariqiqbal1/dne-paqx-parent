@@ -199,10 +199,10 @@
                     <groupId>com.dell.cpsd.common.messaging</groupId>
                     <artifactId>common-rabbitmq</artifactId>
                 </exclusion>
-                <exclusion>
-                    <groupId>com.dell.cpsd.service.cs</groupId>
-                    <artifactId>credential-service</artifactId>
-                </exclusion>
+                <!--<exclusion>-->
+                    <!--<groupId>com.dell.cpsd.service.cs</groupId>-->
+                    <!--<artifactId>credential-service</artifactId>-->
+                <!--</exclusion>-->
             </exclusions>
         </dependency>
 
@@ -215,12 +215,12 @@
         <!--&lt;!&ndash;<optional>true</optional>&ndash;&gt;-->
     <!--</dependency>-->
 
-        <dependency>
-            <groupId>com.dell.cpsd.service.cs</groupId>
-            <artifactId>credential-service</artifactId>
-            <version>1.3-SNAPSHOT</version>
-            <!--<optional>true</optional>-->
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.dell.cpsd.service.cs</groupId>-->
+            <!--<artifactId>credential-service</artifactId>-->
+            <!--<version>1.3-SNAPSHOT</version>-->
+            <!--&lt;!&ndash;<optional>true</optional>&ndash;&gt;-->
+        <!--</dependency>-->
 
         <!-- Camunda dependencies -->
         <dependency>
