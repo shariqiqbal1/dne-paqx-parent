@@ -23,7 +23,7 @@
     </licenses>
 
     <properties>
-        <dockerImage.name>dne-paqx</dockerImage.name>
+        <dockerImage.name>node-expansion-service</dockerImage.name>
     </properties>
 
     <dependencies>

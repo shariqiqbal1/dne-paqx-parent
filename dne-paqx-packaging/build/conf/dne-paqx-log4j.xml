@@ -6,6 +6,7 @@
 
     <appender name="consoleAppender" class="org.apache.log4j.ConsoleAppender">
         <layout class="org.apache.log4j.PatternLayout">
+            <param name="Threshold" value="DEBUG"/>
             <param name="ConversionPattern" value="%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p (%t) %c{1} - %m%n"/>
         </layout>
     </appender>
@@ -42,18 +43,18 @@
 
 
     <logger name="com.dell">
-        <level value="INFO"/>
+        <level value="DEBUG"/>
     </logger>
 
     <logger name="org.springframework">
-        <level value="INFO"/>
+        <level value="DEBUG"/>
     </logger>
 
     <root>
         <level value="INFO"/>
         <appender-ref ref="errorFileAppender"/>
         <appender-ref ref="infoFileAppender"/>
-   <!-- <appender-ref ref="debugFileAppender"/>
-        <appender-ref ref="consoleAppender"/> -->
+   <!-- <appender-ref ref="debugFileAppender"/>-->
+        <appender-ref ref="consoleAppender"/>
     </root>
 </log4j:configuration>

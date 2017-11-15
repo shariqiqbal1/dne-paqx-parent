@@ -14,7 +14,7 @@ then
     exit 1
 fi
 
-PKG_NAME=dell-cpsd-$DOCKER_IMAGE_NAME
+PKG_NAME=dell-cpsd-dne-$DOCKER_IMAGE_NAME
 
 [[ -z "$BUILD_NUMBER" ]] && export BUILD_NUMBER=0
 [[ -z "$RPM_NAME" ]] && export RPM_NAME=$PKG_NAME

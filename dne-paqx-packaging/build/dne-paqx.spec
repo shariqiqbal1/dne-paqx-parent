@@ -37,7 +37,7 @@ exit 0
 
 %install
 
-install -D dell-cpsd-dne-paqx.tar %{buildroot}/opt/dell/cpsd/dne-paqx/image/dell-cpsd-dne-paqx.tar
+install -D dell-cpsd-dne-node-expansion-service.tar %{buildroot}/opt/dell/cpsd/dne-paqx/image/dell-cpsd-dne-node-expansion-service.tar
 install -D install/docker-compose.yml %{buildroot}/opt/dell/cpsd/dne-paqx/install/docker-compose.yml
 
 %post
@@ -56,13 +56,13 @@ if [ $1 -eq 1 ];then
 
     usermod -aG docker core
 
-    docker load -i ${SERVICE_BASE}/image/dell-cpsd-dne-paqx.tar
+    docker load -i ${SERVICE_BASE}/image/dell-cpsd-dne-node-expansion-service.tar
 
     (
         cd ${SERVICE_BASE}/install/
         docker-compose create
     )
-    docker start dell-cpsd-dne-paqx
+    docker start dell-cpsd-dne-node-expansion-service
 
     echo "Dell Inc. DNE PAQX components install has completed successfully."
 
@@ -86,11 +86,11 @@ if [ $1 -eq 0 ];then
 
 
     echo "Stopping Dell Inc. DNE PAQX components"
-    /usr/bin/docker stop dell-cpsd-dne-paqx
-    /usr/bin/docker rm --volumes dell-cpsd-dne-paqx
+    /usr/bin/docker stop dell-cpsd-dne-node-expansion-service
+    /usr/bin/docker rm --volumes dell-cpsd-dne-node-expansion-service
 
     echo "Deleting the DNE PAQX components for Dell Inc."
-    /usr/bin/docker rmi $(docker images -q dell-cpsd-dne-paqx)
+    /usr/bin/docker rmi $(docker images -q dell-cpsd-dne-node-expansion-service)
 
     echo "Dell Inc. DNE PAQX components removal has completed successfully"
 fi
@@ -102,4 +102,4 @@ exit 0
 %attr(0755,core,dell) %dir /opt/dell/cpsd/dne-paqx/image
 %attr(0755,core,dell) %dir /opt/dell/cpsd/dne-paqx/install
 %attr(0644,root,root) /opt/dell/cpsd/dne-paqx/install/docker-compose.yml
-%attr(0644,root,root) /opt/dell/cpsd/dne-paqx/image/dell-cpsd-dne-paqx.tar
+%attr(0644,root,root) /opt/dell/cpsd/dne-paqx/image/dell-cpsd-dne-node-expansion-service.tar

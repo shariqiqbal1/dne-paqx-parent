@@ -134,6 +134,7 @@ fi
 JKS_PASSPHRASE=$(cat ${BASE_CERTS_DIR}/${FQDN}.pwd)
 java -Xms64m -Xmx192m \
     -cp /opt/dell/cpsd/dne-paqx/lib/*:/opt/dell/cpsd/dne-paqx/conf/* \
+    -Djavax.net.debug=all \
     -Dcontainer.id=$CONTAINERID \
     -Djavax.net.ssl.trustStore=${JKS_FILE} \
     -Djavax.net.ssl.trustStorePassword=${JKS_PASSPHRASE} \

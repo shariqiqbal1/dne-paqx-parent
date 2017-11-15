@@ -199,7 +199,27 @@
                     <groupId>com.dell.cpsd.common.messaging</groupId>
                     <artifactId>common-rabbitmq</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.dell.cpsd.service.cs</groupId>
+                    <artifactId>credential-service</artifactId>
+                </exclusion>
             </exclusions>
+        </dependency>
+
+        <!--<dependency>-->
+        <!--<groupId>com.dell.cpsd</groupId>-->
+        <!--<artifactId>credential-service-api</artifactId>-->
+        <!--<classifier>schemas</classifier>-->
+        <!--<type>zip</type>-->
+        <!--<version>1.3.3-SNAPSHOT</version>-->
+        <!--&lt;!&ndash;<optional>true</optional>&ndash;&gt;-->
+    <!--</dependency>-->
+
+        <dependency>
+            <groupId>com.dell.cpsd.service.cs</groupId>
+            <artifactId>credential-service</artifactId>
+            <version>1.3-SNAPSHOT</version>
+            <!--<optional>true</optional>-->
         </dependency>
 
         <!-- Camunda dependencies -->
@@ -277,6 +297,13 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
             <version>${spring-boot.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+            <version>5.0.11.Final</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -370,6 +397,19 @@
                             <includes>**\/*.jsd</includes>
                         </configuration>
                     </execution>
+
+                    <!--<execution>-->
+                        <!--<phase>generate-sources</phase>-->
+                        <!--<id>unpack-json-schemas-credential-service-api</id>-->
+                        <!--<goals>-->
+                            <!--<goal>unpack-dependencies</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<includeGroupIds>com.dell.cpsd</includeGroupIds>-->
+                            <!--<includeArtifactIds>credential-service-api</includeArtifactIds>-->
+                            <!--<includes>**\/*.jsd</includes>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
                 </executions>
             </plugin>
 
@@ -462,6 +502,33 @@
                             <customRuleFactory>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.DefaultRuleFactory</customRuleFactory>
                         </configuration>
                     </execution>
+                    <!--<execution>-->
+                        <!--<id>generate-json-type-credential-service-api</id>-->
+                        <!--<phase>generate-resources</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>generate</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<sourceDirectory>${project.build.directory}/dependency/credentials-service-api/schema/json-->
+                            <!--</sourceDirectory>-->
+                            <!--<targetPackage>com.dell.cpsd.credential.model.api-->
+                            <!--</targetPackage>-->
+                            <!--<outputDirectory>${project.build.directory}/generated-sources/credential-service-api</outputDirectory>-->
+                            <!--<removeOldOutput>true</removeOldOutput>-->
+                            <!--<useLongIntegers>true</useLongIntegers>-->
+                            <!--<includeConstructors>true</includeConstructors>-->
+                            <!--<generateBuilders>true</generateBuilders>-->
+                            <!--<includeAdditionalProperties>false</includeAdditionalProperties>-->
+                            <!--<serializable>false</serializable>-->
+                            <!--<useCommonsLang3>true</useCommonsLang3>-->
+                            <!--<includeJsr303Annotations>true</includeJsr303Annotations>-->
+                            <!--<sourceSortOrder>FILES_FIRST</sourceSortOrder>-->
+                            <!--<customAnnotator>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.MessageAnnotator-->
+                            <!--</customAnnotator>-->
+                            <!--<customRuleFactory>com.dell.cpsd.common.contract.enricher.plugins.jsonschema2pojo.DefaultRuleFactory-->
+                            <!--</customRuleFactory>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
                 </executions>
             </plugin>
 
