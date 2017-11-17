@@ -60,4 +60,8 @@ public class DneMessageHandlerConfig
         return new DneEventHandler();
     }
     
+    @Bean
+    public DneMessageHandler dneMessageHandler(){
+        return new DneMessageHandler();
+    }
 }

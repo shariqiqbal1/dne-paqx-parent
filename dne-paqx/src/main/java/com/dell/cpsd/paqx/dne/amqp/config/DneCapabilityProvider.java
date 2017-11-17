@@ -30,7 +30,7 @@ public class DneCapabilityProvider
         capabilityDataModel.setResponseExchangeType(AmqpExchangeTypes.TOPIC);
         capabilityDataModel.setResponseMessageType("com.dell.cpsd.dne.test.response.message");
         capabilityDataModel.setResponseMessageVersion("com.dell.cpsd.dne.test.response.message.version");
-        capabilityDataModel.setResponseRoutingKey("com.dell.cpsd.dne.test.response.routing.key{replyTo}");
+        capabilityDataModel.setResponseRoutingKey("com.dell.cpsd.dne.test.response.routing.key.{replyTo}");
         
         return capabilityDataModel;
         

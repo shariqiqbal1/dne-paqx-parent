@@ -4,6 +4,42 @@
  */
 package com.dell.cpsd.paqx.dne.rest.controller;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+
+import com.dell.cpsd.MessageProperties;
+import com.dell.cpsd.NodesListed;
+import com.dell.cpsd.ce.client.CapabilityExecutionService;
+import com.dell.cpsd.common.rabbitmq.consumer.handler.AsyncAcknowledgement;
+import com.dell.cpsd.hdp.capability.registry.api.Capability;
+import com.dell.cpsd.hdp.capability.registry.client.ICapabilityService;
 import com.dell.cpsd.paqx.dne.domain.Job;
 import com.dell.cpsd.paqx.dne.domain.node.DiscoveredNodeInfo;
 import com.dell.cpsd.paqx.dne.rest.exception.WorkflowNotFoundException;
@@ -24,33 +60,6 @@ import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
 import com.dell.cpsd.storage.capabilities.api.CatalogService;
 import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -97,6 +106,19 @@ public class NodeExpansionController
     
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    
+    @Autowired
+    private ICapabilityService capabilityService;
+    
+    @Autowired
+    private CapabilityExecutionService capabilityExecutionService;
+    
+    @Autowired
+    private String replyTo;
+    
+    
+    @Autowired
+    private AsyncAcknowledgement<List<com.dell.cpsd.DiscoveredNode>> listDiscoveredNodesResponseHandler; 
     /**
      * Send request to get about info for node expansion PAQX.
      * @return Returns about information for node expansion PAQX.
@@ -340,6 +362,48 @@ public class NodeExpansionController
     @ResponseStatus(HttpStatus.ACCEPTED)
     public void setIdracNetworkSettings() throws ServiceTimeoutException, ServiceExecutionException {
         rabbitTemplate.convertAndSend("exchange.dell.cpsd.dne.test.event.exchange", "com.dell.cpsd.dne.test.event.routing.key", new CatalogService());
+        
+    }
+    
+    
+    @RequestMapping(path = "/dneListNode", method = RequestMethod.GET, produces = "application/json")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void listNodes() throws ServiceTimeoutException, ServiceExecutionException {
+        
+        try
+        {
+            MessageProperties messageProperties= new MessageProperties();
+            messageProperties.setCorrelationId(UUID.randomUUID().toString());
+            messageProperties.setReplyTo(replyTo);
+            NodesListed nodesListed= new NodesListed();
+            nodesListed.setMessageProperties(messageProperties);
+          Capability capability =  capabilityService.getCapability("dne-test-capability");
+          CompletableFuture<List<com.dell.cpsd.DiscoveredNode>> discoveredNodesCompletableFuture= listDiscoveredNodesResponseHandler.register(messageProperties.getCorrelationId());
+          capabilityExecutionService.executeCapability(capability, nodesListed);
+          discoveredNodesCompletableFuture.whenComplete((discoveredNodes, exception) -> {
+              if (exception == null)
+              {
+                 
+                 if (discoveredNodes != null)
+                 {
+                     
+                     System.out.println("Received list of nodes size ="+ discoveredNodes.size());
+                 }
+                 
+                 
+              }
+              else
+              {
+                  System.out.println("======Exception occured ========");
+              }
+              
+          });
+          
+          
+        }catch(Exception e){
+            System.out.println("Exception occured");
+        }
+
         
     }
 }
