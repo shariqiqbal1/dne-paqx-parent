@@ -6,8 +6,36 @@
 
 package com.dell.cpsd.paqx.dne.amqp.producer;
 
-import com.dell.cpsd.*;
-import com.dell.cpsd.common.rabbitmq.annotation.Message;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import com.dell.cpsd.ChangeIdracCredentialsRequestMessage;
+import com.dell.cpsd.CompleteNodeAllocationRequestMessage;
+import com.dell.cpsd.ConfigureBootDeviceIdracRequestMessage;
+import com.dell.cpsd.ConfigurePxeBootRequestMessage;
+import com.dell.cpsd.InstallESXiRequestMessage;
+import com.dell.cpsd.ListComponentRequestMessage;
+import com.dell.cpsd.ListNodes;
+import com.dell.cpsd.NodeInventoryRequestMessage;
+import com.dell.cpsd.SetObmSettingsRequestMessage;
+import com.dell.cpsd.contract.extension.amqp.annotation.Message;
 import com.dell.cpsd.hdp.capability.registry.api.Capability;
 import com.dell.cpsd.hdp.capability.registry.api.EndpointProperty;
 import com.dell.cpsd.hdp.capability.registry.api.ProviderEndpoint;
@@ -18,7 +46,6 @@ import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsR
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.CreateStoragePoolRequestMessage;
-import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.SioSdcUpdatePerformanceProfileRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
@@ -41,26 +68,6 @@ import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMRequest
 import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAcceptanceRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsRequestMessage;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-
-import org.mockito.junit.MockitoRule;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 
 /**
  * The tests for the AmqpDneProducer class.

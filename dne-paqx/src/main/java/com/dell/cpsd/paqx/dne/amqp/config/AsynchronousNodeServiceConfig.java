@@ -15,6 +15,7 @@ import com.dell.cpsd.sdk.config.SDKConfiguration;
 import com.dell.cpsd.service.common.client.rpc.DelegatingMessageConsumer;
 import org.camunda.bpm.engine.RuntimeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -56,7 +57,7 @@ public class AsynchronousNodeServiceConfig
     }
 
     @Bean
-    public AsynchronousNodeService asynchronousNodeServiceClient(@Autowired DelegatingMessageConsumer delegatingMessageConsumer,
+    public AsynchronousNodeService asynchronousNodeServiceClient(@Autowired @Qualifier("defaultMessageConsumer") DelegatingMessageConsumer delegatingMessageConsumer,
                                                                  @Autowired DneProducer dneProducer,
                                                                  @Autowired String replyTo)
     {

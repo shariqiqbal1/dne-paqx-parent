@@ -42,7 +42,7 @@ public class RabbitConfigTest {
     private ConnectionFactory rabbitConnectionFactory;
 
     @Mock
-    private PropertiesConfig propertiesConfig;
+    private DnePropertiesConfig propertiesConfig;
 
     @Mock
     @Qualifier("supportedIdClassMapping")

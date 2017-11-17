@@ -5,26 +5,42 @@
 
 package com.dell.cpsd.paqx.dne.amqp.producer;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.dell.cpsd.ChangeIdracCredentialsRequestMessage;
 import com.dell.cpsd.CompleteNodeAllocationRequestMessage;
 import com.dell.cpsd.ConfigureBootDeviceIdracRequestMessage;
 import com.dell.cpsd.ConfigurePxeBootRequestMessage;
 import com.dell.cpsd.InstallESXiRequestMessage;
+import com.dell.cpsd.ListComponentRequestMessage;
 import com.dell.cpsd.ListNodes;
 import com.dell.cpsd.NodeInventoryRequestMessage;
 import com.dell.cpsd.SetObmSettingsRequestMessage;
-import com.dell.cpsd.common.rabbitmq.annotation.Message;
+import com.dell.cpsd.ce.client.CapabilityExecutionService;
+import com.dell.cpsd.ce.exceptions.CapabilityExecutionException;
+import com.dell.cpsd.contract.extension.amqp.annotation.Message;
+import com.dell.cpsd.hdp.capability.registry.api.Capability;
+import com.dell.cpsd.hdp.capability.registry.api.Identity;
 import com.dell.cpsd.hdp.capability.registry.api.ProviderEndpoint;
+import com.dell.cpsd.hdp.capability.registry.client.CapabilityRegistryException;
+import com.dell.cpsd.hdp.capability.registry.client.ICapabilityService;
 import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityBinder;
 import com.dell.cpsd.hdp.capability.registry.client.binder.CapabilityData;
 import com.dell.cpsd.hdp.capability.registry.client.helper.AmqpProviderEndpointHelper;
+import com.dell.cpsd.hdp.capability.registry.exceptions.CapabilityRetrievalException;
 import com.dell.cpsd.rackhd.adapter.model.idrac.IdracNetworkSettingsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateProtectionDomainsRequestMessage;
 import com.dell.cpsd.service.engineering.standards.EssValidateStoragePoolRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.AddHostToProtectionDomainRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.CreateProtectionDomainRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.CreateStoragePoolRequestMessage;
-import com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.ListStorageRequestMessage;
 import com.dell.cpsd.storage.capabilities.api.SioSdcUpdatePerformanceProfileRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.AddEsxiHostVSphereLicenseRequest;
@@ -47,12 +63,6 @@ import com.dell.cpsd.virtualization.capabilities.api.UpdatePCIPassthruSVMRequest
 import com.dell.cpsd.virtualization.capabilities.api.VCenterUpdateSoftwareAcceptanceRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsRequestMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Collection;
 
 /**
  * <p>
@@ -75,6 +85,12 @@ public class AmqpDneProducer implements DneProducer
     private final RabbitTemplate   rabbitTemplate;
     private final CapabilityBinder capabilityBinder;
 
+    @Autowired
+    private ICapabilityService capabilityService;
+    
+    @Autowired
+    private CapabilityExecutionService capabilityExecutionService; 
+    
     public AmqpDneProducer(RabbitTemplate rabbitTemplate, CapabilityBinder capabilityBinder)
     {
         this.rabbitTemplate = rabbitTemplate;
@@ -141,9 +157,9 @@ public class AmqpDneProducer implements DneProducer
         }
     }
 
-    /**
+/*    *//**
      * {@inheritDoc}
-     */
+     *//*
     @Override
     public void publishListScaleIoComponents(final ListComponentRequestMessage request)
     {
@@ -154,7 +170,7 @@ public class AmqpDneProducer implements DneProducer
             LOGGER.info("Publish List ScaleIO Components request message from DNE paqx.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
         }
-    }
+    }*/
 
     /**
      * {@inheritDoc}
@@ -463,13 +479,40 @@ public class AmqpDneProducer implements DneProducer
     @Override
     public void publishCompleteNodeAllocation(CompleteNodeAllocationRequestMessage request)
     {
-        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(CompleteNodeAllocationRequestMessage.class);
+/*        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(CompleteNodeAllocationRequestMessage.class);
 
         if (endpointHelper != null)
         {
             LOGGER.info("Send complete node allocation request message from DNE paqx.");
             rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
-        }
+        }*/
+        
+        
+        String capabilityProfileName ="manage-node-allocation";
+      //AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(CompleteNodeAllocationRequestMessage.class);
+      Capability capability;
+      try
+      {
+          capability = capabilityService.getCapability(capabilityProfileName );
+          if (capability != null)
+          {
+              LOGGER.info("Send complete node allocation request message from DNE paqx.");
+              capabilityExecutionService.executeCapability(capability, request);
+             // rabbitTemplate.convertAndSend(capability.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+          }
+      }
+      catch (CapabilityRetrievalException e)
+      {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+      }
+      catch (CapabilityExecutionException e)
+      {
+          // TODO Auto-generated catch block
+          e.printStackTrace();
+      } 
+        
+        
     }
 
     /**
@@ -612,7 +655,33 @@ public class AmqpDneProducer implements DneProducer
 
     private AmqpProviderEndpointHelper findEndpointHelper(Class inputClass)
     {
-        Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+       
+        
+/*     
+ * Testing get all capabilities and unregister capability
+ *   
+ *   try
+    {
+        Map<Identity,List<Capability>> capabilitiesFromSDK = capabilityService.getAllCapabilities();
+        System.out.println(capabilitiesFromSDK);
+           Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
+           Capability capability = capabilityService.getCapability("dne-test-capability");
+           capabilityService.unregisterCapabilityProvider();
+           capabilitiesFromSDK = capabilityService.getAllCapabilities();
+
+         capability = capabilityService.getCapability("dne-test-capability");
+    }
+    catch (CapabilityRetrievalException e)
+    {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+    }
+    catch (CapabilityRegistryException e)
+    {
+        // TODO Auto-generated catch block
+        e.printStackTrace();
+    }*/
+       Collection<CapabilityData> capabilities = capabilityBinder.getCurrentCapabilities();
 
         if (capabilities == null)
         {
@@ -638,5 +707,21 @@ public class AmqpDneProducer implements DneProducer
     {
         Message messageAnnotation = (Message) messageClass.getAnnotation(Message.class);
         return messageAnnotation.value();
+    }
+
+    @Override
+    public void publishListScaleIoComponents(com.dell.cpsd.storage.capabilities.api.ListComponentRequestMessage request)
+    {
+
+
+        AmqpProviderEndpointHelper endpointHelper = findEndpointHelper(ListComponentRequestMessage.class);
+
+        if (endpointHelper != null)
+        {
+            LOGGER.info("Publish List ScaleIO Components request message from DNE paqx.");
+            rabbitTemplate.convertAndSend(endpointHelper.getRequestExchange(), endpointHelper.getRequestRoutingKey(), request);
+        }
+    
+        
     }
 }

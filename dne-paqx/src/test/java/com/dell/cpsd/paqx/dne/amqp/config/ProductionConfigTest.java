@@ -27,7 +27,7 @@ public class ProductionConfigTest {
     private ProductionConfig productionConfig;
 
     @Mock
-    private PropertiesConfig propertiesConfig;
+    private DnePropertiesConfig propertiesConfig;
 
     @Test
     public void testProductionCachingConnectionFactoryWithoutSSL() throws Exception {

@@ -5,22 +5,24 @@
 
 package com.dell.cpsd.paqx.dne.service.amqp.adapter;
 
-import com.dell.cpsd.common.rabbitmq.message.HasMessageProperties;
-import com.dell.cpsd.common.rabbitmq.message.MessagePropertiesContainer;
-import com.dell.cpsd.service.common.client.callback.ServiceCallback;
-import com.dell.cpsd.service.common.client.callback.ServiceResponse;
-import com.dell.cpsd.service.common.client.rpc.ServiceCallbackAdapter;
-import com.dell.cpsd.service.common.client.rpc.ServiceCallbackRegistry;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
+import com.dell.cpsd.contract.extension.amqp.message.HasMessageProperties;
+import com.dell.cpsd.contract.extension.amqp.message.MessagePropertiesContainer;
+import com.dell.cpsd.service.common.client.callback.ServiceCallback;
+import com.dell.cpsd.service.common.client.callback.ServiceResponse;
+import com.dell.cpsd.service.common.client.rpc.ServiceCallbackAdapter;
+import com.dell.cpsd.service.common.client.rpc.ServiceCallbackRegistry;
 
 @RunWith(MockitoJUnitRunner.class)
 public abstract class BaseResponseAdapterTest<R extends HasMessageProperties<?>>

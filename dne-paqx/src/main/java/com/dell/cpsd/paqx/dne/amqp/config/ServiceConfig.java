@@ -5,6 +5,14 @@
 
 package com.dell.cpsd.paqx.dne.amqp.config;
 
+import com.dell.cpsd.MessageProperties;
+import com.dell.cpsd.common.rabbitmq.config.HandlerRegistrar;
+import com.dell.cpsd.common.rabbitmq.consumer.error.DefaultErrorTransformer;
+import com.dell.cpsd.common.rabbitmq.consumer.error.ErrorTransformer;
+import com.dell.cpsd.contract.extension.amqp.message.HasMessageProperties;
+import com.dell.cpsd.paqx.dne.amqp.handler.DneTestHandler;
+import com.dell.cpsd.paqx.dne.amqp.handler.Error;
+import com.dell.cpsd.paqx.dne.amqp.handler.SampleErrorMessage;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.repository.DataServiceRepository;
 import com.dell.cpsd.paqx.dne.repository.JobRepository;
@@ -29,6 +37,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
 import java.util.Map;
+
+import javax.annotation.PostConstruct;
 
 /**
  * <p>
@@ -72,7 +82,7 @@ public class ServiceConfig
     private DataServiceRepository repository;
 
     @Bean
-    public NodeService nodeServiceClient(@Autowired DelegatingMessageConsumer delegatingMessageConsumer,
+    public NodeService nodeServiceClient(@Autowired @Qualifier("defaultMessageConsumer") DelegatingMessageConsumer delegatingMessageConsumer,
             @Autowired DneProducer dneProducer,
             @Autowired String replyTo)
     {
@@ -98,4 +108,10 @@ public class ServiceConfig
     {
         return new WorkflowServiceImpl(jobRepository, workflowSteps);
     }
+    
+    @Bean
+    public DneCapabilityProvider dneCapabilityProvider(){
+        return new DneCapabilityProvider();
+    }
+
 }

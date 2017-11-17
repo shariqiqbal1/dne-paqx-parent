@@ -104,9 +104,9 @@ public class AddNodeService extends BaseService implements IAddNodeService
     {
         final Map<String, WorkflowTask> workflowTasks = new HashMap<>();
 
-        /*workflowTasks.put("installEsxi", installEsxiTask());
+        //workflowTasks.put("installEsxi", installEsxiTask());
         workflowTasks.put("retrieveEsxiDefaultCredentialDetails", esxiCredentialDetailsTask());
-        workflowTasks.put("addHostToVcenter", addHostToVcenterTask());
+        /*workflowTasks.put("addHostToVcenter", addHostToVcenterTask());
         workflowTasks.put("applyEsxiLicense", applyEsxiLicenseTask());
         workflowTasks.put("updateSoftwareAcceptance", updateSoftwareAcceptanceTask());
         workflowTasks.put("installScaleIoVib", installScaleIoVibTask());
@@ -131,7 +131,7 @@ public class AddNodeService extends BaseService implements IAddNodeService
         workflowTasks.put("updateSdcPerformanceProfile", updateSdcPerformanceProfileTask());
         workflowTasks.put("configurePxeBoot", configurePxeBootTask());
         workflowTasks.put("updateSystemDefinition", updateSystemDefinitionTask());*/
-        workflowTasks.put("notifyNodeDiscoveryToUpdateStatus", notifyNodeDiscoveryToUpdateStatusTask());
+        //workflowTasks.put("notifyNodeDiscoveryToUpdateStatus", notifyNodeDiscoveryToUpdateStatusTask());
 
         return workflowTasks;
     }

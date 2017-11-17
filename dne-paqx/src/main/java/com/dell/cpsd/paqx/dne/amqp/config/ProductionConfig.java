@@ -25,12 +25,12 @@ import org.springframework.context.annotation.Import;
  */
 
 @Configuration
-@Import({PropertiesConfig.class})
+@Import({DnePropertiesConfig.class})
 public class ProductionConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductionConfig.class);
 
     @Autowired
-    private PropertiesConfig propertiesConfig;
+    private DnePropertiesConfig propertiesConfig;
 
     @Bean
     @Qualifier("rabbitConnectionFactory")

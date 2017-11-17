@@ -36,7 +36,7 @@ import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
  */
 
 @Configuration
-@Import({CapabilityRegistryLookupManagerConfig.class, ContextConfig.class, RabbitConfig.class})
+@Import({CapabilityRegistryLookupManagerConfig.class, /*ContextConfig.class,*/ RabbitConfig.class})
 public class CapabilityConfig
 {
     /*
@@ -134,7 +134,9 @@ public class CapabilityConfig
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
                         .withProfile("scaleio-create-storage-pool"),
                new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
-                        .withProfile("scaleio-create-protection-domain")
+                        .withProfile("scaleio-create-protection-domain"),
+               new CapabilityMatcher().withCardinalReduction(CapabilityMatcher.CardinalReduction.ANY)
+                        .withProfile("dne-test-capability")
         );
 
         LOGGER.info("Capability Binder registers with capability registry lookup manager");

@@ -48,7 +48,7 @@ public class ConsumerConfig
 
     @Bean
     SimpleMessageListenerContainer requestListenerContainer(
-            @Autowired DelegatingMessageConsumer delegatingMessageConsumer,
+            @Autowired @Qualifier("defaultMessageConsumer")DelegatingMessageConsumer delegatingMessageConsumer,
             @Autowired MessageConverter dneMessageConverter)
     {
         SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
@@ -62,7 +62,7 @@ public class ConsumerConfig
         return container;
     }
 
-    @Bean
+    @Bean("defaultMessageConsumer")
     public DelegatingMessageConsumer defaultMessageConsumer()
     {
         return new DefaultMessageConsumer();

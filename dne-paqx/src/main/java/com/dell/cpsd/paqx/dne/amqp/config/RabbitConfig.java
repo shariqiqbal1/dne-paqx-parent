@@ -105,7 +105,7 @@ import java.util.Map;
  * @since    1.0
  */
 @Configuration
-@Import({ProductionConfig.class, PropertiesConfig.class})
+@Import({ProductionConfig.class, DnePropertiesConfig.class})
 public class RabbitConfig
 {
     /*
@@ -135,7 +135,7 @@ public class RabbitConfig
      * The configuration properties for the service.
      */
     @Autowired
-    private PropertiesConfig propertiesConfig;
+    private DnePropertiesConfig propertiesConfig;
 
     /*
      * The support system-integration-sdk class mappings

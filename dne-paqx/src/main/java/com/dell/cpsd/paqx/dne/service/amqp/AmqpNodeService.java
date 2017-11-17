@@ -5,6 +5,25 @@
 
 package com.dell.cpsd.paqx.dne.service.amqp;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
+import javax.persistence.NoResultException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
 import com.dell.cpsd.ChangeIdracCredentialsRequestMessage;
 import com.dell.cpsd.ChangeIdracCredentialsResponseMessage;
 import com.dell.cpsd.CompleteNodeAllocationRequestMessage;
@@ -26,7 +45,13 @@ import com.dell.cpsd.NodesListed;
 import com.dell.cpsd.PxeBootConfig;
 import com.dell.cpsd.SetObmSettingsRequestMessage;
 import com.dell.cpsd.SetObmSettingsResponseMessage;
+import com.dell.cpsd.ce.client.CapabilityExecutionService;
+import com.dell.cpsd.ce.exceptions.CapabilityExecutionException;
 import com.dell.cpsd.common.logging.ILogger;
+import com.dell.cpsd.common.rabbitmq.consumer.handler.AsyncAcknowledgement;
+import com.dell.cpsd.hdp.capability.registry.api.Capability;
+import com.dell.cpsd.hdp.capability.registry.client.ICapabilityService;
+import com.dell.cpsd.hdp.capability.registry.exceptions.CapabilityRetrievalException;
 import com.dell.cpsd.paqx.dne.amqp.config.ServiceConfig;
 import com.dell.cpsd.paqx.dne.amqp.producer.DneProducer;
 import com.dell.cpsd.paqx.dne.domain.ComponentDetails;
@@ -167,21 +192,6 @@ import com.dell.cpsd.virtualization.capabilities.api.ValidateVcenterClusterRespo
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsRequestMessage;
 import com.dell.cpsd.virtualization.capabilities.api.VmPowerOperationsResponseMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
-
-import javax.persistence.NoResultException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -249,7 +259,16 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
     private static final long timeout            = 1800000L;
     private static final long installEsxiTimeout = 2700000L;
+    
+    @Autowired
+    private ICapabilityService capabilityService;
+    
+    @Autowired
+    private CapabilityExecutionService capabilityExecutionService; 
 
+    @Autowired
+    private AsyncAcknowledgement<List<com.dell.cpsd.DiscoveredNode>> listDiscoveredNodesResponseHandler;
+    
     /**
      * AmqpNodeService constructor.
      *
@@ -264,7 +283,9 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     public AmqpNodeService( DelegatingMessageConsumer consumer, DneProducer producer, String replyTo,
             final DataServiceRepository repository, final DiscoveryInfoToVCenterDomainTransformer discoveryInfoToVCenterDomainTransformer,
             final ScaleIORestToScaleIODomainTransformer scaleIORestToScaleIODomainTransformer,
-            final StoragePoolEssRequestTransformer storagePoolEssRequestTransformer)
+            final StoragePoolEssRequestTransformer storagePoolEssRequestTransformer
+            //,AsyncAcknowledgement<List<DiscoveredNode>> listDiscoveredNodesResponseHandler
+            )
     {
         super(LOGGER);
 
@@ -415,6 +436,47 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
         messageProperties.setReplyTo(replyTo);
 
         ListNodes request = new ListNodes(messageProperties, Collections.emptyList());
+        /*
+         * 
+         * executeCapability and getAndExecuteCapabilityAsync test work flow. As of now because of message validation,
+         *  we have to go in debug mode and set replyTo from Node discovery as NA for the flow to work
+         * 
+         * try
+        {
+            //Capability capability = capabilityService.getCapability("list-discovered-nodes");
+            CompletableFuture<List<com.dell.cpsd.DiscoveredNode>> discoveredNodesCompletableFuture= listDiscoveredNodesResponseHandler.register(messageProperties.getCorrelationId());
+           // capabilityExecutionService.executeCapability(capability, request);
+            capabilityExecutionService.getAndExecuteCapabilityAsync("list-discovered-nodes", request);
+            discoveredNodesCompletableFuture.whenComplete((discoveredNodes, exception) -> {
+                if (exception == null)
+                {
+                   
+                   if (discoveredNodes != null)
+                   {
+                       
+                       System.out.println("Received list of nodes "+ discoveredNodes.toString());
+                   }
+                   
+                   
+                }
+                else
+                {
+                    System.out.println("======Exception occured ========");
+                }
+                
+            });
+            
+        }
+        catch (CapabilityRetrievalException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        catch (CapabilityExecutionException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }*/
         ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
         {
             @Override
@@ -671,6 +733,16 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
     @Override
     public boolean notifyNodeAllocationComplete(String elementIdentifier) throws ServiceTimeoutException, ServiceExecutionException
     {
+        try
+        {
+            Capability capability = capabilityService.getCapability("dne-test-capability");
+            System.out.println("got dne capability from capability registry "+ capability.getProfile());
+        }
+        catch (CapabilityRetrievalException e1)
+        {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
         com.dell.cpsd.MessageProperties messageProperties = new com.dell.cpsd.MessageProperties();
         messageProperties.setCorrelationId(UUID.randomUUID().toString());
         messageProperties.setTimestamp(Calendar.getInstance().getTime());
@@ -678,7 +750,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
         CompleteNodeAllocationRequestMessage request = new CompleteNodeAllocationRequestMessage(messageProperties, elementIdentifier, null);
 
-        ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
+/*        ServiceResponse<?> response = processRequest(timeout, new ServiceRequestCallback()
         {
             @Override
             public String getRequestId()
@@ -689,11 +761,22 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             @Override
             public void executeRequest(String requestId) throws Exception
             {
-                producer.publishCompleteNodeAllocation(request);
+                //producer.publishCompleteNodeAllocation(request);
+                
             }
-        });
+        });*/
 
-        CompleteNodeAllocationResponseMessage responseInfo = processResponse(response, CompleteNodeAllocationResponseMessage.class);
+        CompleteNodeAllocationResponseMessage responseInfo=null;
+        try
+        {
+            responseInfo = (CompleteNodeAllocationResponseMessage) capabilityExecutionService.getAndExecuteCapability("manage-node-allocation", request, 30000);
+        }
+        catch (CapabilityRetrievalException | CapabilityExecutionException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+       // CompleteNodeAllocationResponseMessage responseInfo = processResponse(response, CompleteNodeAllocationResponseMessage.class);
 
         if ( responseInfo != null && CompleteNodeAllocationResponseMessage.Status.FAILED.equals(responseInfo.getStatus()))
         {
@@ -1746,6 +1829,19 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
             requestMessage.setMessageProperties(
                     new com.dell.cpsd.virtualization.capabilities.api.MessageProperties(new Date(), correlationId, replyTo));
 
+            ListEsxiCredentialDetailsResponseMessage responseMessage=null;
+            try
+            {
+                responseMessage = (ListEsxiCredentialDetailsResponseMessage) capabilityExecutionService.getAndExecuteCapability("esxi-credential-details", requestMessage, 10000);
+            }
+            catch (CapabilityRetrievalException | CapabilityExecutionException e)
+            {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            
+            
+            /*
             ServiceResponse<?> callbackResponse = processRequest(timeout, new ServiceRequestCallback()
             {
                 @Override
@@ -1763,7 +1859,7 @@ public class AmqpNodeService extends AbstractServiceClient implements NodeServic
 
             ListEsxiCredentialDetailsResponseMessage responseMessage = processResponse(callbackResponse,
                     ListEsxiCredentialDetailsResponseMessage.class);
-
+*/
             boolean validResponse = responseMessage != null;
             validResponse = validResponse && responseMessage.getMessageProperties() != null;
             validResponse = validResponse && responseMessage.getComponentUuid() != null;

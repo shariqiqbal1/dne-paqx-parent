@@ -21,10 +21,12 @@ import com.dell.cpsd.paqx.dne.service.workflow.addnode.IAddNodeService;
 import com.dell.cpsd.paqx.dne.service.workflow.preprocess.IPreProcessService;
 import com.dell.cpsd.service.common.client.exception.ServiceExecutionException;
 import com.dell.cpsd.service.common.client.exception.ServiceTimeoutException;
+import com.dell.cpsd.storage.capabilities.api.CatalogService;
 import com.dell.cpsd.virtualization.capabilities.api.ClusterInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.DefaultErrorAttributes;
 import org.springframework.http.HttpStatus;
@@ -92,6 +94,9 @@ public class NodeExpansionController
 
     @Autowired
     private NodeService nodeService;
+    
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
     /**
      * Send request to get about info for node expansion PAQX.
      * @return Returns about information for node expansion PAQX.
@@ -329,5 +334,12 @@ public class NodeExpansionController
         }
 
         return idracInfo;
+    }
+    
+    @RequestMapping(path = "/dneEvent", method = RequestMethod.GET, produces = "application/json")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void setIdracNetworkSettings() throws ServiceTimeoutException, ServiceExecutionException {
+        rabbitTemplate.convertAndSend("exchange.dell.cpsd.dne.test.event.exchange", "com.dell.cpsd.dne.test.event.routing.key", new CatalogService());
+        
     }
 }
