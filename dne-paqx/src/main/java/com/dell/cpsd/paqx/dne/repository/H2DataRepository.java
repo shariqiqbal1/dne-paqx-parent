@@ -25,6 +25,8 @@ import com.dell.cpsd.paqx.dne.service.model.ComponentEndpointIds;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -59,8 +61,19 @@ public class H2DataRepository implements DataServiceRepository
     @PersistenceContext
     private EntityManager entityManager;
 
-    private ComponentPersister vCenterComponentPersister = new VCenterComponentPersister(entityManager);
-    private ComponentPersister scaleIOComponentPersister = new ScaleIOComponentPersister(entityManager);
+    @Autowired
+    @Qualifier("jack1")
+    private VCenterComponentPersister vCenterComponentPersister;
+
+    @Autowired
+    @Qualifier("jack2")
+    private ScaleIOComponentPersister scaleIOComponentPersister;
+
+    public H2DataRepository()
+    {
+        System.out.println("Here");
+        System.out.println("H2:EntityManager is: " + entityManager);
+    }
 
     @Override
     @Transactional
@@ -437,7 +450,7 @@ public class H2DataRepository implements DataServiceRepository
         if (!CollectionUtils.isEmpty(vCenterHosts))
         {
             vCenterHosts.stream().filter(Objects::nonNull)
-                .forEach(hs -> hs.getHostDnsConfig().getDnsConfigIPs().stream().filter(Objects::nonNull).forEach(dnsServers::add));
+                    .forEach(hs -> hs.getHostDnsConfig().getDnsConfigIPs().stream().filter(Objects::nonNull).forEach(dnsServers::add));
             returnVal.addAll(dnsServers);
         }
 
@@ -825,129 +838,5 @@ public class H2DataRepository implements DataServiceRepository
         }
 
         return true;
-    }
-
-
-}
-
-interface ComponentPersister
-{
-    boolean handleSave(final List<ComponentDetails> componentEndpointDetailsList);
-}
-
-abstract class AComponentPersister implements ComponentPersister
-{
-    private static final Logger LOG = LoggerFactory.getLogger(AComponentPersister.class);
-    private final EntityManager entityManager;
-
-    public AComponentPersister(final EntityManager entityManager)
-    {
-        super();
-        this.entityManager=entityManager;
-    }
-    
-    @Override
-    public boolean handleSave(final List<ComponentDetails> componentEndpointDetailsList)
-    {
-        LOG.info(saveMessage());
-
-        if (componentEndpointDetailsList.isEmpty())
-        {
-            LOG.error("No Components Found");
-            return false;
-        }
-
-        try
-        {
-            componentEndpointDetailsList.stream().filter(Objects::nonNull).forEach(componentDetails -> {
-                String componentUuid = componentDetails.getComponentUuid();
-
-                try
-                {
-                    TypedQuery<ComponentDetails> componentDetailsTypedQuery = entityManager
-                            .createQuery("select c from ComponentDetails as c where c.componentUuid =:componentUuid",
-                                    ComponentDetails.class);
-                    componentDetailsTypedQuery.setParameter("componentUuid", componentUuid);
-
-                    final List<ComponentDetails> existingComponentList = componentDetailsTypedQuery.getResultList();
-                    if (existingComponentList != null && !existingComponentList.isEmpty())
-                    {
-                        entityManager.merge(existingComponentList.get(0));
-                        entityManager.flush();
-                    }
-                    else
-                    {
-                        entityManager.persist(componentDetails);
-                    }
-                }
-                catch (Exception e)
-                {
-                    LOG.error(exception1Message(), e);
-                }
-            });
-
-            return true;
-        }
-        catch (Exception e)
-        {
-            LOG.error(exception2Message(), e);
-            return false;
-        }
-    }
-
-    abstract String exception1Message();
-    abstract String exception2Message();
-    abstract String saveMessage();
-}
-
-class VCenterComponentPersister extends AComponentPersister
-{
-    VCenterComponentPersister(EntityManager entityManager)
-    {
-        super(entityManager);
-    }
-
-    @Override
-    String saveMessage()
-    {
-        return "Persisting VCenter Component, Endpoint and Credential UUID";
-    }
-
-    @Override
-    String exception1Message()
-    {
-        return "Exception occurred while persisting vcenter component details[{}]";
-    }
-
-    @Override
-    String exception2Message()
-    {
-        return "Exception occurred while persisting vcenter data";
-    }
-}
-
-class ScaleIOComponentPersister extends AComponentPersister
-{
-    ScaleIOComponentPersister(EntityManager entityManager)
-    {
-        super(entityManager);
-    }
-
-    @Override
-    String saveMessage()
-    {
-        return "Persisting ScaleIO Component, Endpoint and Credential UUID";
-    }
-
-    @Override
-    public String exception1Message()
-    {
-        return "Exception occurred while persisting scaleio component details [{}]";
-    }
-
-    @Override
-    public String exception2Message()
-    {
-        return " Exception occurred while persisting scaleio data";
     }
 }

@@ -52,6 +52,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -144,6 +145,12 @@ public class H2DataRepositoryTest
 
     @Mock
     private TypedQuery<DiscoveredNodeInfo> discoveredNodeInfoTypedQuery;
+
+    @InjectMocks
+    VCenterComponentPersister vCenterComponentPersister = new VCenterComponentPersister();
+
+    @InjectMocks
+    ScaleIOComponentPersister scaleIOComponentPersister = new ScaleIOComponentPersister();
 
    @InjectMocks
     private H2DataRepository repository = new H2DataRepository();
@@ -293,6 +300,7 @@ public class H2DataRepositoryTest
         doReturn(this.componentDetailsTypedQuery).when(this.entityManager).createQuery(anyString(), any());
         doReturn(Collections.emptyList()).when(this.componentDetailsTypedQuery).getResultList();
         doNothing().when(this.entityManager).persist(any());
+        //doCallRealMethod().when(this.vCenterComponentPersister).handleSave(any());
 
         assertTrue(this.repository.saveVCenterComponentDetails(componentDetailsList));
         verify(this.entityManager).persist(this.componentDetails);
