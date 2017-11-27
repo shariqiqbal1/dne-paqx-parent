@@ -292,7 +292,6 @@ public class CamundaWorkflowServiceImpl implements ICamundaWorkflowService
                 activityName = getActivityName(hai.getActivityId(), bpmnModelInstance);
 
                 Activity activity = new Activity();
-                activity.setId(hai.getId());
                 activity.setName(activityName);
                 activity.setStartTime(hai.getStartTime());
                 activity.setEndTime(hai.getEndTime());
