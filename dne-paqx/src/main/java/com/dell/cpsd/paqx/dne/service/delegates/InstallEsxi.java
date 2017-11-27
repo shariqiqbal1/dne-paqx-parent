@@ -24,6 +24,7 @@ import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.H
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.INSTALL_ESXI_FAILED;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.INSTALL_ESXI_MESSAGE_ID;
 import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.NODE_DETAIL;
+import static com.dell.cpsd.paqx.dne.service.delegates.utils.DelegateConstants.VCENTER_CLUSTER_NAME;
 
 @Component
 @Scope("prototype")
@@ -98,6 +99,8 @@ public class InstallEsxi extends BaseWorkflowDelegate
             updateDelegateStatus(message);
             throw new BpmnError(INSTALL_ESXI_FAILED, message);
         }
+
+        delegateExecution.setVariable(VCENTER_CLUSTER_NAME, nodeDetail.getClusterName());
         String fqdn = this.generateHostFqdn(nodeDetail.getEsxiManagementHostname());
         delegateExecution.setVariable(HOSTNAME, fqdn);
         LOGGER.info("Install Esxi on Node " + nodeDetail.getServiceTag() + " was successful.");
