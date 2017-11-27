@@ -140,7 +140,7 @@ public class H2DataRepository implements DataServiceRepository
                     endpointDetails.getEndpointUrl(), credentialDetails.getCredentialUuid());
         }
 
-        LOG.error();
+        LOG.error("No Component Endpoints found in the database");
 
         return null;
     }
@@ -922,7 +922,7 @@ class VCenterComponentPersister extends AComponentPersister
     @Override
     String exception2Message()
     {
-        return "No Component Endpoints found in the database";
+        return "Exception occurred while persisting vcenter data";
     }
 }
 
